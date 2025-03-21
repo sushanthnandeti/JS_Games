@@ -30,10 +30,8 @@ class Game {
     }
 }
 
-
 const game = new Game(canvas);
 game.render(ctx)
 console.log(game);
-
 
 });
