@@ -26,6 +26,17 @@ class Player {
         context.fill();
         context.restore();  // restore to the save state above
         context.stroke();
+        context.beginPath();
+        context.moveTo(this.collisionX, this.collisionY);
+        context.lineTo(this.game.mouse.x, this.game.mouse.y);
+        context.stroke();
+    }
+
+    update() {
+        this.speedX = (this.game.mouse.x - this.collisionX)/20;
+        this.speedY = (this.game.mouse.y - this.collisionY)/20;
+        this.collisionX += this.speedX;
+        this.collisionY += this.speedY;
     }
 }
 
@@ -60,17 +71,24 @@ class Game {
 
             this.mouse.x = e.offsetX; 
             this.mouse.y = e.offsetY;
-            console.log(this.mouse.x, this.mouse.y)
+        
         }); 
     }
     
     render(context) {
         this.player.draw(context);
+        this.player.update();
     }
 }
 
 const game = new Game(canvas);
-game.render(ctx);
-console.log(game);
+
+function animate() {
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    game.render(ctx);
+    window.requestAnimationFrame(animate);
+}
+
+animate();
 
 })
