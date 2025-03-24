@@ -15,7 +15,9 @@ class Player {
         this.game = game;
         this.collisionX = this.game.width * 0.5;
         this.collisionY = this.game.height * 0.5; 
-        this.collisionRadius = 30
+        this.collisionRadius = 30;
+        this.dx;
+        this.dy;
     }
 
     draw(context) {
@@ -33,10 +35,41 @@ class Player {
     }
 
     update() {
-        this.speedX = (this.game.mouse.x - this.collisionX)/20;
-        this.speedY = (this.game.mouse.y - this.collisionY)/20;
+        this.dx = this.game.mouse.x - this.collisionX;
+        this.dy = this.game.mouse.y - this.collisionY;
+        const distance = Math.hypot(this.dy, this.dx);
+
+        if(distance > this.speedModifier) {
+            this.speedX = this.dx/distance || 0;
+            this.speedY = this.dy/distance || 0;
+        }
+        else {
+            this.speedX = 0;
+            this.speedY = 0;
+        }
+
         this.collisionX += this.speedX;
         this.collisionY += this.speedY;
+        this.speedModifier = 20;
+    }
+}
+
+class Obstacle {
+    constructor (game) {
+        this.game = game
+        this.collisionX = Math.random() * this.game.width; 
+        this.collisionY = Math.random() * this.game.height;
+        this.collisionRadius = 60;
+    }
+
+    draw(context) {
+        context.beginPath();
+        context.arc( this.collisionX,  this.collisionY, this.collisionRadius, 0, Math.PI * 2);
+        context.save();             // saves the state of the canvas
+        context.globalAlpha = 0.5;  // property to set the transparency on the drawings made on the canvas
+        context.fill();
+        context.restore();  // restore to the save state above
+        context.stroke();
     }
 }
 
@@ -51,6 +84,8 @@ class Game {
             y : this.height * 0.5,
             pressed : false
         }
+        this.numberOfObstacles = 5;
+        this.obstacles = [];
 
         // ES6 arrow functions automatically inherit the 'this' keyword from the parent class/scope
         canvas.addEventListener('mousedown', (e) => {
@@ -69,8 +104,11 @@ class Game {
             
         canvas.addEventListener('mousemove', (e) => {
 
-            this.mouse.x = e.offsetX; 
-            this.mouse.y = e.offsetY;
+            if(this.mouse.pressed) {
+                this.mouse.x = e.offsetX; 
+                this.mouse.y = e.offsetY;
+            }
+           
         
         }); 
     }
@@ -79,9 +117,18 @@ class Game {
         this.player.draw(context);
         this.player.update();
     }
+
+    init() {
+        for (let i = 0; i < this.numberOfObstacles; i++){
+            this.obstacles.push(new Obstacle(this));
+        }
+    }
 }
 
 const game = new Game(canvas);
+game.init()
+console.log(game)
+
 
 function animate() {
     ctx.clearRect(0,0,canvas.width, canvas.height);
