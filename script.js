@@ -116,6 +116,7 @@ class Game {
     render(context) {
         this.player.draw(context);
         this.player.update();
+        this.obstacles.forEach(obstacle => obstacle.draw(context));
     }
 
     init() {
