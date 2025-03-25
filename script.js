@@ -67,6 +67,7 @@ class Obstacle {
         this.height = this.spriteHeight;
         this.spriteX = this.collisionX - this.width * 0.5; 
         this.spriteY = this.collisionY - this.height * 0.5 - 50; 
+        
     }
 
     draw(context) {
@@ -86,13 +87,14 @@ class Game {
         this.canvas = canvas;
         this.height = this.canvas.height;
         this.width = this.canvas.width;
+        this.topMargin = 260;
         this.player = new Player(this);
         this.mouse = {
             x : this.width * 0.5,
             y : this.height * 0.5,
             pressed : false
         }
-        this.numberOfObstacles = 2;
+        this.numberOfObstacles = 5;
         this.obstacles = [];
 
         // ES6 arrow functions automatically inherit the 'this' keyword from the parent class/scope
@@ -137,13 +139,19 @@ class Game {
                 const dx = testObstacle.collisionX - obstacle.collisionX;
                 const dy = testObstacle.collisionY - obstacle.collisionY;
                 const distance = Math.hypot(dy,dx);
-                const sumOfRadii = testObstacle.collisionRadius + obstacle.collisionRadius;
+                const distanceBuffer = 100;
+                const sumOfRadii = testObstacle.collisionRadius + obstacle.collisionRadius + distanceBuffer;
                 
                 if (distance < sumOfRadii) {
                     overlap = true;
                 }
             });
-            if (!overlap) {
+
+            const margin = testObstacle.collisionRadius * 2;
+
+            if (!overlap && testObstacle.spriteX > 0 && testObstacle.spriteX < this.width - testObstacle.width
+                && testObstacle.collisionY > this.topMargin + margin && testObstacle.collisionY < this.height - margin) 
+            {
                 this.obstacles.push(testObstacle);
             }
             attempts++;
