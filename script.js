@@ -37,6 +37,7 @@ class Player {
     update() {
         this.dx = this.game.mouse.x - this.collisionX;
         this.dy = this.game.mouse.y - this.collisionY;
+        this.speedModifier = 20;
         const distance = Math.hypot(this.dy, this.dx);
 
         if(distance > this.speedModifier) {
@@ -48,9 +49,17 @@ class Player {
             this.speedY = 0;
         }
 
-        this.collisionX += this.speedX;
-        this.collisionY += this.speedY;
-        this.speedModifier = 20;
+        this.collisionX += this.speedX * this.speedModifier;
+        this.collisionY += this.speedY * this.speedModifier;
+       
+
+        // Player collision with obstacles
+
+        this.game.obstacles.forEach( obstacle => {
+            if(this.game.checkCollision(this, obstacle)) {
+                console.log("collision");
+            }
+        })
     }
 }
 
@@ -130,6 +139,15 @@ class Game {
         this.player.draw(context);
         this.player.update();
         this.obstacles.forEach(obstacle => obstacle.draw(context));
+    }
+
+    checkCollision(a,b) {
+        const dx = a.collisionX - b.collisionX;
+        const dy = a.collisionY - b.collisionY;
+        const distance = Math.hypot(dy,dx); 
+        const sumOfRadii = a.collisionX + b.collisionY;
+
+        return (sumOfRadii < distance);
     }
 
     init() {
