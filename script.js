@@ -16,8 +16,11 @@ class Player {
         this.collisionX = this.game.width * 0.5;
         this.collisionY = this.game.height * 0.5; 
         this.collisionRadius = 30;
+        this.speedx = 0;
+        this.speedY = 0;
         this.dx;
         this.dy;
+        this.speedModifier = 20;
     }
 
     draw(context) {
@@ -37,8 +40,8 @@ class Player {
     update() {
         this.dx = this.game.mouse.x - this.collisionX;
         this.dy = this.game.mouse.y - this.collisionY;
-        this.speedModifier = 20;
         const distance = Math.hypot(this.dy, this.dx);
+        this.speedModifier = 20;
 
         if(distance > this.speedModifier) {
             this.speedX = this.dx/distance || 0;
@@ -55,9 +58,19 @@ class Player {
 
         // Player collision with obstacles
 
+        // [(sumOfRadii < distance), distance, sumOfRadii, dx, dy]
+
         this.game.obstacles.forEach( obstacle => {
-            if(this.game.checkCollision(this, obstacle)) {
-                console.log("collision");
+            let [collision, distance, sumOfRadii, dx, dy] = this.game.checkCollision(this, obstacle);
+            
+            // let collision = game.checkCollision(this, obstacle)[0]
+            // let distance = game.checkCollision(this, obstacle)[1]
+
+            if(collision) {
+                const unit_x = dx/distance; 
+                const unit_y = dy/distance;
+                this.collisionX = obstacle.collisionX + (sumOfRadii + 1) * unit_x;
+                this.collisionY = obstacle.collisionY + (sumOfRadii + 1) * unit_y;          
             }
         })
     }
@@ -129,9 +142,7 @@ class Game {
             if(this.mouse.pressed) {
                 this.mouse.x = e.offsetX; 
                 this.mouse.y = e.offsetY;
-            }
-           
-        
+            }        
         }); 
     }
     
@@ -145,9 +156,9 @@ class Game {
         const dx = a.collisionX - b.collisionX;
         const dy = a.collisionY - b.collisionY;
         const distance = Math.hypot(dy,dx); 
-        const sumOfRadii = a.collisionX + b.collisionY;
+        const sumOfRadii = a.collisionRadius + b.collisionRadius;
 
-        return (sumOfRadii < distance);
+        return [(distance < sumOfRadii), distance, sumOfRadii, dx, dy];
     }
 
     init() {
