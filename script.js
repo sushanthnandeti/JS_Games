@@ -146,6 +146,34 @@ class Obstacle {
     }
 }
 
+class Egg {
+    constructor(game) {
+        this.game = game;
+        this.collisionX = Math.random() * this.game.width;
+        this.collisionY = Math.random() * this.game.height;
+        this.collisionRadius = 40;
+        this.spriteWidth = 110;
+        this.spriteHeight = 135;
+        this.width = this.spriteWidth;
+        this.height = this.spriteHeight; 
+        this.spriteX = this.collisionX + this.width * 0.5; 
+        this.spriteY = this.collisionY + this.height * 0.5;
+        this.image = document.getElementById("egg");
+    }
+
+    draw(context) {
+        context.drawImage(this.image, this.spriteX, this.spriteY);
+        if (this.game.debug) {
+        context.beginPath();
+        context.arc( this.collisionX,  this.collisionY, this.collisionRadius, 0, Math.PI * 2);
+        context.save();             // saves the state of the canvas
+        context.globalAlpha = 0.5;  // property to set the transparency on the drawings made on the canvas
+        context.fill();
+        context.restore();  // restore to the save state above
+        context.stroke();
+}
+    }
+}
 class Game {
     constructor(canvas) {
         this.canvas = canvas;
@@ -153,8 +181,10 @@ class Game {
         this.width = this.canvas.width;
         this.topMargin = 260;
         this.debug = true;
-        this.fps = 150;
+        this.fps = 60;
         this.timer = 0;
+        this.eggTimer = 0;
+        this.eggInterval = 500;
         this.interval = 1000/this.fps;
         this.player = new Player(this);
         this.mouse = {
@@ -164,7 +194,8 @@ class Game {
         }
         this.numberOfObstacles = 5;
         this.obstacles = [];
-
+        this.eggs = [];
+        this.maxEggs = 10;
 
         // ES6 arrow functions automatically inherit the 'this' keyword from the parent class/scope
         canvas.addEventListener('mousedown', (e) => {
@@ -203,12 +234,24 @@ class Game {
             //animate the next frame
             ctx.clearRect(0,0,canvas.width, canvas.height);
             this.obstacles.forEach(obstacle => obstacle.draw(context));
+            this.eggs.forEach(egg => egg.draw(context));
             this.player.draw(context);
             this.player.update();
             this.timer = 0
         }
         
-        this.timer++;
+        this.timer+=deltaTime;
+
+        // add eggs periodically 
+
+        if (this.eggTimer < this.eggInterval && this.eggs.length < this.maxEggs) {
+            this.addEgg();
+            this.eggTimer = 0;
+            console.log(this.eggs);
+        }
+        else {  
+            this.eggTimer += deltaTime;
+        }
     }
 
     checkCollision(a,b) {
@@ -220,6 +263,9 @@ class Game {
         return [(distance < sumOfRadii), distance, sumOfRadii, dx, dy];
     }
 
+    addEgg() {
+        this.eggs.push(new Egg(this))
+    }
     init() {
         // Collision detection algorithm to avoid objects overlap
         let attempts = 0; 
