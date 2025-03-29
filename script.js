@@ -19,7 +19,7 @@ class Player {
         this.speedY = 0;
         this.dx;
         this.dy;
-        this.speedModifier = 5;
+        this.speedModifier = 10;
         this.spriteWidth = 255;
         this.spriteHeight = 255;
         this.width = this.spriteWidth;
@@ -84,6 +84,14 @@ class Player {
         this.collisionY += this.speedY * this.speedModifier;
         this.spriteX = this.collisionX - this.width * 0.5;
         this.spriteY = this.collisionY - this.height * 0.5 - 100;
+
+        // horizontal boundaries 
+        if(this.collisionX < this.collisionRadius) this.collisionX = this.collisionRadius; 
+        else if (this.collisionX > this.game.width - this.collisionRadius) this.collisionX = this.game.width - this.collisionRadius; 
+
+        // vertical boundaries
+        if(this.collisionY < this.game.topMargin + this.collisionRadius) this.collisionY = this.game.topMargin + this.collisionRadius;
+        else if (this.collisionY > this.game.height - this.collisionRadius) this.collisionY = this.game.height - this.collisionRadius;
 
         // Player collision with obstacles
 
@@ -218,7 +226,7 @@ class Game {
                 }
             });
 
-            const margin = testObstacle.collisionRadius * 2;
+            const margin = testObstacle.collisionRadius * 3;
 
             if (!overlap && testObstacle.spriteX > 0 && testObstacle.spriteX < this.width - testObstacle.width
                 && testObstacle.collisionY > this.topMargin + margin && testObstacle.collisionY < this.height - margin) 
