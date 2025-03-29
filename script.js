@@ -21,7 +21,7 @@ class Player {
         this.dy;
         this.speedModifier = 10;
         this.spriteWidth = 255;
-        this.spriteHeight = 255;
+        this.spriteHeight = 256;
         this.width = this.spriteWidth;
         this.height = this.spriteHeight;
         this.spriteX = this.collisionX - this.width * 0.5;  
@@ -153,6 +153,9 @@ class Game {
         this.width = this.canvas.width;
         this.topMargin = 260;
         this.debug = true;
+        this.fps = 150;
+        this.timer = 0;
+        this.interval = 1000/this.fps;
         this.player = new Player(this);
         this.mouse = {
             x : this.width * 0.5,
@@ -161,6 +164,7 @@ class Game {
         }
         this.numberOfObstacles = 5;
         this.obstacles = [];
+
 
         // ES6 arrow functions automatically inherit the 'this' keyword from the parent class/scope
         canvas.addEventListener('mousedown', (e) => {
@@ -193,10 +197,18 @@ class Game {
         }); 
     }
     
-    render(context) {
-        this.player.draw(context);
-        this.player.update();
-        this.obstacles.forEach(obstacle => obstacle.draw(context));
+    render(context, deltaTime) {
+
+        if(this.timer > this.interval) {
+            //animate the next frame
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            this.obstacles.forEach(obstacle => obstacle.draw(context));
+            this.player.draw(context);
+            this.player.update();
+            this.timer = 0
+        }
+        
+        this.timer++;
     }
 
     checkCollision(a,b) {
@@ -242,13 +254,15 @@ const game = new Game(canvas);
 game.init()
 console.log(game)
 
+let lastTime = 0;
 
-function animate() {
-    ctx.clearRect(0,0,canvas.width, canvas.height);
-    game.render(ctx);
+function animate(timeStamp) {
+    const deltaTime = timeStamp - lastTime;
+    lastTime = timeStamp;
+    game.render(ctx, deltaTime);
     window.requestAnimationFrame(animate);
 }
 
-animate();
+animate(0);
 
 })
