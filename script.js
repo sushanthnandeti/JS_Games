@@ -149,6 +149,7 @@ class Obstacle {
 class Egg {
     constructor(game) {
         this.game = game;
+        this.image = document.getElementById("egg");
         this.collisionX = Math.random() * this.game.width;
         this.collisionY = Math.random() * this.game.height;
         this.collisionRadius = 40;
@@ -156,9 +157,9 @@ class Egg {
         this.spriteHeight = 135;
         this.width = this.spriteWidth;
         this.height = this.spriteHeight; 
-        this.spriteX = this.collisionX + this.width * 0.5; 
-        this.spriteY = this.collisionY + this.height * 0.5;
-        this.image = document.getElementById("egg");
+        this.spriteX = this.collisionX - this.width * 0.5; 
+        this.spriteY = this.collisionY - this.height * 0.5 - 30;
+        
     }
 
     draw(context) {
@@ -184,7 +185,7 @@ class Game {
         this.fps = 60;
         this.timer = 0;
         this.eggTimer = 0;
-        this.eggInterval = 500;
+        this.eggInterval = 1000;
         this.interval = 1000/this.fps;
         this.player = new Player(this);
         this.mouse = {
@@ -244,7 +245,7 @@ class Game {
 
         // add eggs periodically 
 
-        if (this.eggTimer < this.eggInterval && this.eggs.length < this.maxEggs) {
+        if (this.eggTimer > this.eggInterval && this.eggs.length < this.maxEggs) {
             this.addEgg();
             this.eggTimer = 0;
             console.log(this.eggs);
