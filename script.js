@@ -144,6 +144,10 @@ class Obstacle {
         context.stroke();
         }
     }
+
+    update() {
+
+    }
 }
 
 class Egg {
@@ -160,6 +164,7 @@ class Egg {
         this.height = this.spriteHeight; 
         this.spriteX;
         this.spriteY;
+        this.gameObjects = [];
         
     }
 
@@ -251,14 +256,20 @@ class Game {
         if(this.timer > this.interval) {
             //animate the next frame
             ctx.clearRect(0,0,canvas.width, canvas.height);
-            this.obstacles.forEach(obstacle => obstacle.draw(context));
-            this.eggs.forEach(egg => {
-                egg.draw(context);
-                egg.update();
+            this.gameObjects = [...this.obstacles, ...this.eggs, this.player];
+
+            // sort the elements/objects based on the vertical values 
+
+            this.gameObjects.sort((a,b) => {
+                return a.collisionY - b.collisionY;
             });
-            this.player.draw(context);
-            this.player.update();
-            this.timer = 0
+            
+            this.gameObjects.forEach(object => {
+                object.draw(context);
+                object.update();
+            });
+            
+            this.timer = 0;
         }
         
         this.timer+=deltaTime;
