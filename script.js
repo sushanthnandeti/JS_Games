@@ -184,7 +184,7 @@ class Egg {
     update() {
         this.spriteX = this.collisionX - this.width * 0.5; 
         this.spriteY = this.collisionY - this.height * 0.5 - 30;
-        let collisionObjects = [this.game.player, ...this.game.obstacles];
+        let collisionObjects = [this.game.player, ...this.game.obstacles, ...this.game.enemies];
         collisionObjects.forEach(object => {
             let [collision, distance, sumOfRadii, dx, dy] = this.game.checkCollision(this, object);
             if (collision) {
@@ -202,14 +202,14 @@ class Enemy {
     constructor(game) {
         this.game = game; 
         this.image = document.getElementById("toad");
-        this.collisionX = this.game.width; 
-        this.collisionY = Math.random() * this.game.height;
         this.speedX = Math.random() * 3 + 0.5;
         this.collisionRadius = 40;
         this.spriteHeight = 260; 
         this.spriteWidth = 140; 
         this.width = this.spriteWidth; 
         this.height = this.spriteHeight;
+        this.collisionX = this.game.width + this.width + Math.random() * this.game.width * 0.5;
+        this.collisionY = this.game.topMargin + (Math.random() * (this.game.height - this.game.topMargin));
         this.spriteX; 
         this.spriteY; 
 }
@@ -228,11 +228,25 @@ class Enemy {
     }
 
     update() {
+        this.spriteX = this.collisionX - this.width * 0.5;
+        this.spriteY = this.collisionY - this.height + 40;
         this.collisionX -= this.speedX;
         if (this.spriteX + this.width < 0 ) {
-            this.collisionX = this.game.width;
-            this.collisionY = Math.random() * this.game.height;
+            this.collisionX = this.game.width + this.width + Math.random() * this.game.width * 0.5;
+            this.collisionY = this.game.topMargin + (Math.random() * (this.game.height - this.game.topMargin));
         }
+
+        let collisionObjects = [this.game.player, ...this.game.obstacles];
+        collisionObjects.forEach(object => {
+            let [collision, distance, sumOfRadii, dx, dy] = this.game.checkCollision(this, object);
+            if (collision) {
+                const unit_x = dx / distance; 
+                const unit_y = dy / distance;
+                this.collisionX = object.collisionX + (sumOfRadii + 1) * unit_x; 
+                this.collisionY = object.collisionY + (sumOfRadii + 1) * unit_y;
+
+            }
+        })
      }
 
 }
@@ -257,6 +271,7 @@ class Game {
         }
         this.numberOfObstacles = 5;
         this.obstacles = [];
+        this.enemies = [];
         this.eggs = [];
         this.maxEggs = 10;
 
@@ -296,7 +311,7 @@ class Game {
         if(this.timer > this.interval) {
             //animate the next frame
             ctx.clearRect(0,0,canvas.width, canvas.height);
-            this.gameObjects = [...this.obstacles, ...this.eggs, this.player];
+            this.gameObjects = [...this.obstacles, ...this.eggs, this.player, ...this.enemies];
 
             // sort the elements/objects based on the vertical values 
 
@@ -319,7 +334,6 @@ class Game {
         if (this.eggTimer > this.eggInterval && this.eggs.length < this.maxEggs) {
             this.addEgg();
             this.eggTimer = 0;
-            console.log(this.eggs);
         }
         else {  
             this.eggTimer += deltaTime;
@@ -338,7 +352,15 @@ class Game {
     addEgg() {
         this.eggs.push(new Egg(this))
     }
+
+    addEnemy() {
+        this.enemies.push(new Enemy(this))
+    }
     init() {
+        for (let i=0; i<3; i++) {
+            this.addEnemy();
+            console.log(this.enemies);  
+        }
         // Collision detection algorithm to avoid objects overlap
         let attempts = 0; 
         while (this.obstacles.length < this.numberOfObstacles && attempts <500) {
