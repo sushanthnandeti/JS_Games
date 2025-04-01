@@ -251,6 +251,33 @@ class Enemy {
 
 }
 
+class Larva { 
+    constructor(game) {
+        this.game = game; 
+        this.image = document.getElementById("canvas");
+        this.collisionRadius = 40;
+        this.collisionX = x;
+        this.collisionY = y; 
+        this.spriteWidth = 150; 
+        this.spriteHeight = 150;
+        this.width = this.spriteWidth; 
+        this.height = this.spriteWidth;
+        this.spriteX; 
+        this.spriteY;
+        this.speedY = 1 + Math.random();
+    }
+
+    draw(context) {
+        context.drawImage(this.image, this.spriteX, this.spriteY);
+    }
+
+    update() {
+        this.collisionY-= this.speedY;
+        this.spriteX = this.collisionX - this.width * 0.5; 
+        this.spriteY = this.collisionY - this.width * 0.5;
+    }
+}
+
 class Game {
     constructor(canvas) {
         this.canvas = canvas;
