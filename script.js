@@ -206,6 +206,7 @@ class Egg {
 
         // egg hatching logic 
         if (this.hatchTimer > this.hatchInterval) {
+            this.game.hatchlings.push(new Larva(this.game, this.collisionX, this.collisionY));
             this.markedForDeletion = true; 
             this.game.removeGameObjects();
         }
@@ -270,9 +271,9 @@ class Enemy {
 }
 
 class Larva { 
-    constructor(game) {
+    constructor(game, x, y) {
         this.game = game; 
-        this.image = document.getElementById("canvas");
+        this.image = document.getElementById("larva");
         this.collisionRadius = 40;
         this.collisionX = x;
         this.collisionY = y; 
@@ -286,13 +287,31 @@ class Larva {
     }
 
     draw(context) {
-        context.drawImage(this.image, this.spriteX, this.spriteY);
+        context.drawImage(this.image, 0, 0, this.spriteWidth, this.spriteHeight, 
+                            this.spriteX, this.spriteY, this.width, this.height );
+
+        if (this.game.debug) {
+            context.beginPath();
+            context.arc( this.collisionX,  this.collisionY, this.collisionRadius, 0, Math.PI * 2);
+            context.save();             // saves the state of the canvas
+            context.globalAlpha = 0.5;  // property to set the transparency on the drawings made on the canvas
+            context.fill();
+            context.restore();  // restore to the save state above
+            context.stroke();
+        }
     }
 
     update() {
         this.collisionY-= this.speedY;
         this.spriteX = this.collisionX - this.width * 0.5; 
-        this.spriteY = this.collisionY - this.width * 0.5;
+        this.spriteY = this.collisionY - this.width * 0.5 - 50;
+
+        // move to safety 
+
+        if (this.collisionY < this.game.topMargin) {
+            this.markedForDeletion = true;
+            this.game.removeGameObjects();
+        }
     }
 }
 
@@ -319,6 +338,7 @@ class Game {
         this.enemies = [];
         this.eggs = [];
         this.maxEggs = 10;
+        this.hatchlings = [];
 
         // ES6 arrow functions automatically inherit the 'this' keyword from the parent class/scope
         canvas.addEventListener('mousedown', (e) => {
@@ -356,7 +376,7 @@ class Game {
         if(this.timer > this.interval) {
             //animate the next frame
             ctx.clearRect(0,0,canvas.width, canvas.height);
-            this.gameObjects = [...this.obstacles, ...this.eggs, this.player, ...this.enemies];
+            this.gameObjects = [...this.obstacles, ...this.eggs, this.player, ...this.enemies, ...this.hatchlings];
 
             // sort the elements/objects based on the vertical values 
 
@@ -403,7 +423,8 @@ class Game {
     }
 
     removeGameObjects() {
-        this.eggs = this.eggs.filter(object => !object.markedForDeletion)
+        this.eggs = this.eggs.filter(object => !object.markedForDeletion);
+        this.hatchlings = this.hatchlings.filter(object => !object.markedForDeletion);
     }
 
 
@@ -435,7 +456,7 @@ class Game {
                 && testObstacle.collisionY > this.topMargin + margin && testObstacle.collisionY < this.height - margin) 
             {
                 this.obstacles.push(testObstacle);
-            }
+            }   
             attempts++;
         }
         }
