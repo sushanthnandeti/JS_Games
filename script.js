@@ -197,6 +197,46 @@ class Egg {
         })
     }
 }
+
+class Enemy {
+    constructor(game) {
+        this.game = game; 
+        this.image = document.getElementById("toad");
+        this.collisionX = this.game.width; 
+        this.collisionY = Math.random() * this.game.height;
+        this.speedX = Math.random() * 3 + 0.5;
+        this.collisionRadius = 40;
+        this.spriteHeight = 260; 
+        this.spriteWidth = 140; 
+        this.width = this.spriteWidth; 
+        this.height = this.spriteHeight;
+        this.spriteX; 
+        this.spriteY; 
+}
+
+    draw(context) {
+        context.drawImage(this.image, this.spriteX, this.spriteY);
+        if (this.game.debug) {
+            context.beginPath();
+            context.arc( this.collisionX,  this.collisionY, this.collisionRadius, 0, Math.PI * 2);
+            context.save();             // saves the state of the canvas
+            context.globalAlpha = 0.5;  // property to set the transparency on the drawings made on the canvas
+            context.fill();
+            context.restore();  // restore to the save state above
+            context.stroke();
+        }
+    }
+
+    update() {
+        this.collisionX -= this.speedX;
+        if (this.spriteX + this.width < 0 ) {
+            this.collisionX = this.game.width;
+            this.collisionY = Math.random() * this.game.height;
+        }
+     }
+
+}
+
 class Game {
     constructor(canvas) {
         this.canvas = canvas;
@@ -263,7 +303,7 @@ class Game {
             this.gameObjects.sort((a,b) => {
                 return a.collisionY - b.collisionY;
             });
-            
+
             this.gameObjects.forEach(object => {
                 object.draw(context);
                 object.update();
