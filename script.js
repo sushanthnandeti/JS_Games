@@ -8,6 +8,8 @@ window.addEventListener('load', function() {
     ctx.fillStyle = 'white';    
     ctx.lineWidth = 3;
     ctx.strokeStyle = 'white';
+    ctx.font = '40px Helvetica';
+    ctx.textAlign = 'center';
 
 class Player {
     constructor(game) {
@@ -165,7 +167,9 @@ class Egg {
         this.spriteX;
         this.spriteY;
         this.gameObjects = [];
-        
+        this.hatchTimer = 0; 
+        this.hatchInterval = 5000;
+        this.markedForDeletion = false;
     }
 
     draw(context) {
@@ -178,12 +182,16 @@ class Egg {
         context.fill();
         context.restore();  // restore to the save state above
         context.stroke();
+        const displayTimer = (this.hatchTimer * 0.001).toFixed(0);
+        context.fillText(displayTimer, this.collisionX, this.collisionY - this.collisionRadius * 2.5);
 }
     }
 
-    update() {
+    update(deltaTime) {
         this.spriteX = this.collisionX - this.width * 0.5; 
         this.spriteY = this.collisionY - this.height * 0.5 - 30;
+
+        // collisions logic
         let collisionObjects = [this.game.player, ...this.game.obstacles, ...this.game.enemies];
         collisionObjects.forEach(object => {
             let [collision, distance, sumOfRadii, dx, dy] = this.game.checkCollision(this, object);
@@ -195,6 +203,16 @@ class Egg {
 
             }
         })
+
+        // egg hatching logic 
+        if (this.hatchTimer > this.hatchInterval) {
+            this.markedForDeletion = true; 
+            this.game.removeGameObjects();
+        }
+        else {
+            this.hatchTimer+= deltaTime;
+        }
+        
     }
 }
 
@@ -348,7 +366,7 @@ class Game {
 
             this.gameObjects.forEach(object => {
                 object.draw(context);
-                object.update();
+                object.update(deltaTime);
             });
             
             this.timer = 0;
@@ -383,6 +401,12 @@ class Game {
     addEnemy() {
         this.enemies.push(new Enemy(this))
     }
+
+    removeGameObjects() {
+        this.eggs = this.eggs.filter(object => !object.markedForDeletion)
+    }
+
+
     init() {
         for (let i=0; i<3; i++) {
             this.addEnemy();
