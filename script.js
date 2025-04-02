@@ -8,7 +8,7 @@ window.addEventListener('load', function() {
     ctx.fillStyle = 'white';    
     ctx.lineWidth = 3;
     ctx.strokeStyle = 'black';
-    ctx.font = '40px Helvetica';
+    ctx.font = '40px Bangers';
     ctx.textAlign = 'center';
 
 class Player {
@@ -253,7 +253,7 @@ class Enemy {
         this.spriteX = this.collisionX - this.width * 0.5;
         this.spriteY = this.collisionY - this.height + 40;
         this.collisionX -= this.speedX;
-        if (this.spriteX + this.width < 0 ) {
+        if (this.spriteX + this.width < 0 && !this.game.gameOver) {
             this.collisionX = this.game.width + this.width + Math.random() * this.game.width * 0.5;
             this.collisionY = this.game.topMargin + (Math.random() * (this.game.height - this.game.topMargin));
             this.frameY = Math.floor(Math.random() * 4);
@@ -317,7 +317,7 @@ class Larva {
         if (this.collisionY < this.game.topMargin) {
             this.markedForDeletion = true;
             this.game.removeGameObjects();
-            this.game.score++;
+            if (!this.game.gameOver) this.game.score++;  // score is added only if the gameover is false
 
             // firefly appearance logice 
             for (let i = 0; i < 3 ; i++) {
@@ -435,7 +435,9 @@ class Game {
         this.hatchlings = [];
         this.particles = [];
         this.score = 0;
+        this.winningScore = 5;
         this.lostHatchlings = 0;
+        this.gameOver = false;
 
         // ES6 arrow functions automatically inherit the 'this' keyword from the parent class/scope
         canvas.addEventListener('mousedown', (e) => {
@@ -494,7 +496,7 @@ class Game {
 
         // add eggs periodically 
 
-        if (this.eggTimer > this.eggInterval && this.eggs.length < this.maxEggs) {
+        if (this.eggTimer > this.eggInterval && this.eggs.length < this.maxEggs && !this.gameOver) {
             this.addEgg();
             this.eggTimer = 0;
         }
@@ -510,6 +512,37 @@ class Game {
             context.fillText('Lost: ' + this.lostHatchlings, 25, 100);
         }
         context.restore();
+
+        // win or lose logic 
+
+        if(this.score >= this.winningScore) {
+            this.gameOver = true;
+            context.save();
+            context.fillStyle = 'rgba(0,0,0,0.5)';
+            context.fillRect(0,0,this.width, this.height);
+            context.restore();
+            context.fillStyle = 'white';
+            context.textAlign = 'center';
+            let message1; 
+            let message2; 
+
+            if (this.lostHatchlings <= 2) {
+                message1 = 'Congratulations!';
+                message2 = 'You saved all the hatchlings!'
+            }
+            else{
+                message1 = 'Damn Bruh!';
+                message2 = ' You lost ' + this.lostHatchlings + 'hatchlings';
+            }
+
+            context.font = '120px Bangers';
+            context.fillText(message1, this.width * 0.5, this.height * 0.5 - 20);
+            context.font = '40px Bangers';
+            context.fillText(message2, this.width * 0.5, this.height * 0.5 + 30);
+            context.fillText("Final Score " + this.score +  ". Press 'R' to restart the game ",  
+                                this.width * 0.5, this.height * 0.5 + 80);
+            context.restore();
+        }
     }
 
     checkCollision(a,b) {
