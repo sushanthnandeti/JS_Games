@@ -283,11 +283,14 @@ class Larva {
         this.height = this.spriteWidth;
         this.spriteX; 
         this.spriteY;
+        this.frameX = 0; 
+        this.frameY = Math.floor(Math.random() * 2);
         this.speedY = 1 + Math.random();
+
     }
 
     draw(context) {
-        context.drawImage(this.image, 0, 0, this.spriteWidth, this.spriteHeight, 
+        context.drawImage(this.image, this.frameX * this.spriteWidth, this.frameY * this.spriteHeight, this.spriteWidth, this.spriteHeight, 
                             this.spriteX, this.spriteY, this.width, this.height );
 
         if (this.game.debug) {
@@ -295,7 +298,7 @@ class Larva {
             context.arc( this.collisionX,  this.collisionY, this.collisionRadius, 0, Math.PI * 2);
             context.save();             // saves the state of the canvas
             context.globalAlpha = 0.5;  // property to set the transparency on the drawings made on the canvas
-            context.fill();
+            context.fill();``
             context.restore();  // restore to the save state above
             context.stroke();
         }
@@ -311,7 +314,30 @@ class Larva {
         if (this.collisionY < this.game.topMargin) {
             this.markedForDeletion = true;
             this.game.removeGameObjects();
+            this.game.score++;
         }
+
+        let collisionObjects = [this.game.player, ...this.game.obstacles];
+        collisionObjects.forEach(object => {
+            let [collision, distance, sumOfRadii, dx, dy] = this.game.checkCollision(this, object);
+            if (collision) {
+                const unit_x = dx / distance; 
+                const unit_y = dy / distance;
+                this.collisionX = object.collisionX + (sumOfRadii + 1) * unit_x; 
+                this.collisionY = object.collisionY + (sumOfRadii + 1) * unit_y;
+
+            }
+        })
+
+        // collision with enemies
+
+        this.game.enemies.forEach(enemy => {
+            if (this.game.checkCollision(this, enemy)[0]) {
+                this.markedForDeletion = true;
+                this.game.removeGameObjects();
+                this.game.lostHatchlings++;
+            }
+        })
     }
 }
 
@@ -339,6 +365,8 @@ class Game {
         this.eggs = [];
         this.maxEggs = 10;
         this.hatchlings = [];
+        this.score = 0;
+        this.lostHatchlings = 0;
 
         // ES6 arrow functions automatically inherit the 'this' keyword from the parent class/scope
         canvas.addEventListener('mousedown', (e) => {
