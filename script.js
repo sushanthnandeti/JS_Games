@@ -431,6 +431,15 @@ class Game {
         else {  
             this.eggTimer += deltaTime;
         }
+
+        // display the score status on the canvas 
+        context.save();
+        context.textAlign = 'left';
+        context.fillText('Score: ' + this.score, 25, 50);
+        if (this.debug) {
+            context.fillText('Lost: ' + this.lostHatchlings, 25, 100);
+        }
+        context.restore();
     }
 
     checkCollision(a,b) {
