@@ -7,7 +7,7 @@ window.addEventListener('load', function() {
     canvas.width = 1280;
     ctx.fillStyle = 'white';    
     ctx.lineWidth = 3;
-    ctx.strokeStyle = 'white';
+    ctx.strokeStyle = 'black';
     ctx.font = '40px Helvetica';
     ctx.textAlign = 'center';
 
@@ -315,6 +315,11 @@ class Larva {
             this.markedForDeletion = true;
             this.game.removeGameObjects();
             this.game.score++;
+
+            // firefly appearance logice 
+            for (let i = 0; i < 3 ; i++) {
+                this.game.particles.push(new FireFly(this.game, this.collisionX, this.collisionY, 'yellow'));
+            }      
         }
 
         let collisionObjects = [this.game.player, ...this.game.obstacles];
@@ -341,6 +346,49 @@ class Larva {
     }
 }
 
+class Particle {
+    constructor(game, x, y, color) { 
+        this.game = game; 
+        this.collisionX  = x;
+        this.collisionY = y; 
+        this.color = color; 
+        this.radius = Math.floor(Math.random() * 10 + 5);
+        this.speedX = Math.random() * 6 - 3; 
+        this.speedY = Math.random() * 2 + 0.5; 
+        this.angle = 0;
+        this.va = Math.random() * 0.1 + 0.001;  // angle velocity for each animation frame
+        this.markedForDeletion = false;
+    }
+
+    draw(context) {
+        context.save();
+        context.fillStyle = this.color; 
+        context.beginPath();
+        context.arc(this.collisionX, this.collisionY, this.radius, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
+        context.restore();
+    }
+}
+
+class FireFly extends Particle {
+    
+    update() {
+        this.angle += this.va;
+        this.collisionX += this.speedX; 
+        this.collisionY -= this.speedY; 
+        if (this.collisionY < 0 - this.radius) {
+            this.markedForDeletion = true; 
+            this.game.removeGameObjects();
+        }
+    }
+}
+
+class Spark extends Particle {
+
+}
+
+
 class Game {
     constructor(canvas) {
         this.canvas = canvas;
@@ -365,6 +413,7 @@ class Game {
         this.eggs = [];
         this.maxEggs = 10;
         this.hatchlings = [];
+        this.particles = [];
         this.score = 0;
         this.lostHatchlings = 0;
 
@@ -404,7 +453,8 @@ class Game {
         if(this.timer > this.interval) {
             //animate the next frame
             ctx.clearRect(0,0,canvas.width, canvas.height);
-            this.gameObjects = [...this.obstacles, ...this.eggs, this.player, ...this.enemies, ...this.hatchlings];
+            this.gameObjects = [...this.obstacles, ...this.eggs, this.player, ...this.enemies, 
+                                    ...this.hatchlings, ...this.particles];
 
             // sort the elements/objects based on the vertical values 
 
@@ -462,6 +512,7 @@ class Game {
     removeGameObjects() {
         this.eggs = this.eggs.filter(object => !object.markedForDeletion);
         this.hatchlings = this.hatchlings.filter(object => !object.markedForDeletion);
+        this.particles = this.particles.filter(object => !object.markedForDeletion);
     }
 
 
