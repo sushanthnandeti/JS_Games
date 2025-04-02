@@ -168,7 +168,7 @@ class Egg {
         this.spriteY;
         this.gameObjects = [];
         this.hatchTimer = 0; 
-        this.hatchInterval = 5000;
+        this.hatchInterval = 10000;
         this.markedForDeletion = false;
     }
 
@@ -220,7 +220,7 @@ class Egg {
 class Enemy {
     constructor(game) {
         this.game = game; 
-        this.image = document.getElementById("toad");
+        this.image = document.getElementById("toads");
         this.speedX = Math.random() * 3 + 0.5;
         this.collisionRadius = 40;
         this.spriteHeight = 260; 
@@ -230,15 +230,18 @@ class Enemy {
         this.collisionX = this.game.width + this.width + Math.random() * this.game.width * 0.5;
         this.collisionY = this.game.topMargin + (Math.random() * (this.game.height - this.game.topMargin));
         this.spriteX; 
-        this.spriteY; 
+        this.spriteY;
+        this.frameX = 0; 
+        this.frameY = Math.floor(Math.random() * 4); 
 }
 
     draw(context) {
-        context.drawImage(this.image, this.spriteX, this.spriteY);
+        context.drawImage(this.image, this.frameX * this.spriteWidth, this.frameY * this.spriteHeight, this.spriteWidth, this.spriteHeight,
+                           this.spriteX, this.spriteY, this.width, this.height);
         if (this.game.debug) {
             context.beginPath();
             context.arc( this.collisionX,  this.collisionY, this.collisionRadius, 0, Math.PI * 2);
-            context.save();             // saves the state of the canvas
+            context.save();             // saves the state of the canvas    
             context.globalAlpha = 0.5;  // property to set the transparency on the drawings made on the canvas
             context.fill();
             context.restore();  // restore to the save state above
@@ -253,6 +256,7 @@ class Enemy {
         if (this.spriteX + this.width < 0 ) {
             this.collisionX = this.game.width + this.width + Math.random() * this.game.width * 0.5;
             this.collisionY = this.game.topMargin + (Math.random() * (this.game.height - this.game.topMargin));
+            this.frameY = Math.floor(Math.random() * 4);
         }
 
         let collisionObjects = [this.game.player, ...this.game.obstacles];
@@ -263,7 +267,6 @@ class Enemy {
                 const unit_y = dy / distance;
                 this.collisionX = object.collisionX + (sumOfRadii + 1) * unit_x; 
                 this.collisionY = object.collisionY + (sumOfRadii + 1) * unit_y;
-
             }
         })
      }
@@ -428,7 +431,7 @@ class Game {
         this.obstacles = [];
         this.enemies = [];
         this.eggs = [];
-        this.maxEggs = 10;
+        this.maxEggs = 5;
         this.hatchlings = [];
         this.particles = [];
         this.score = 0;
@@ -534,7 +537,7 @@ class Game {
 
 
     init() {
-        for (let i=0; i<3; i++) {
+        for (let i=0; i<5; i++) {
             this.addEnemy();
             console.log(this.enemies);  
         }
