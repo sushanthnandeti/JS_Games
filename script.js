@@ -523,6 +523,9 @@ class Game {
             context.restore();
             context.fillStyle = 'white';
             context.textAlign = 'center';
+            context.shadowOffsetX = 4;
+            context.shadowOffsetY = 4;
+            context.shadowColor = 'black';
             let message1; 
             let message2; 
 
