@@ -32,9 +32,15 @@ class Player {
         this.frameX = 0;
         this.frameY = 5;
     
-
     }
 
+    restart() {
+        this.collisionX = this.game.width * 0.5;
+        this.collisionY = this.game.height * 0.5; 
+        this.spriteX = this.collisionX - this.width * 0.5;
+        this.spriteY = this.collisionY - this.height * 0.5 - 100;
+
+    }
     draw(context) {
         context.drawImage(this.image, this.frameX * this.spriteWidth, this.frameY * this.spriteHeight, this.spriteWidth, 
                             this.spriteHeight, this.spriteX, this.spriteY, this.width, this.height);
@@ -310,7 +316,7 @@ class Larva {
     update() {
         this.collisionY-= this.speedY;
         this.spriteX = this.collisionX - this.width * 0.5; 
-        this.spriteY = this.collisionY - this.width * 0.5 - 50;
+        this.spriteY = this.collisionY - this.width * 0.5 - 40;
 
         // move to safety 
 
@@ -324,8 +330,8 @@ class Larva {
                 this.game.particles.push(new FireFly(this.game, this.collisionX, this.collisionY, 'yellow'));
             }      
         }
-
-        let collisionObjects = [this.game.player, ...this.game.obstacles];
+        // collision with obstacles
+        let collisionObjects = [this.game.player, ...this.game.obstacles, ...this.game.eggs];
         collisionObjects.forEach(object => {
             let [collision, distance, sumOfRadii, dx, dy] = this.game.checkCollision(this, object);
             if (collision) {
@@ -340,7 +346,7 @@ class Larva {
         // collision with enemies
 
         this.game.enemies.forEach(enemy => {
-            if (this.game.checkCollision(this, enemy)[0]) {
+            if (this.game.checkCollision(this, enemy)[0] && !this.game.gameOver) {
                 this.markedForDeletion = true;
                 this.game.removeGameObjects();
                 this.game.lostHatchlings++;
@@ -467,6 +473,9 @@ class Game {
             if(e.key == 'd') {
                 this.debug = !this.debug;
             }        
+            else if(e.key == 'r') {
+                this.restart();
+            }
         }); 
     }
     
@@ -571,6 +580,24 @@ class Game {
         this.particles = this.particles.filter(object => !object.markedForDeletion);
     }
 
+    restart() {
+        this.player.restart();  
+        this.obstacles = [];
+        this.enemies = [];
+        this.eggs = [];
+        this.maxEggs = 5;
+        this.hatchlings = [];
+        this.particles = [];
+        this.mouse = {
+            x : this.width * 0.5,
+            y : this.height * 0.5,
+            pressed : false
+        }
+        this.score = 0;
+        this.lostHatchlings = 0;
+        this.gameOver = false;
+        this.init();
+    }
 
     init() {
         for (let i=0; i<5; i++) {
