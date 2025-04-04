@@ -225,19 +225,13 @@ class Egg {
 
 class Enemy {
     constructor(game) {
-        this.game = game; 
-        this.image = document.getElementById("toads");
+        this.game = game;   
         this.speedX = Math.random() * 3 + 0.5;
-        this.collisionRadius = 40;
-        this.spriteHeight = 260; 
-        this.spriteWidth = 140; 
-        this.width = this.spriteWidth; 
-        this.height = this.spriteHeight;
-        this.collisionX = this.game.width + this.width + Math.random() * this.game.width * 0.5;
+        this.collisionRadius = 40;   
         this.collisionY = this.game.topMargin + (Math.random() * (this.game.height - this.game.topMargin));
         this.spriteX; 
         this.spriteY;
-        this.frameX = 0; 
+        this.frameX = Math.floor(Math.random() * 2); 
         this.frameY = Math.floor(Math.random() * 4); 
 }
 
@@ -262,6 +256,7 @@ class Enemy {
         if (this.spriteX + this.width < 0 && !this.game.gameOver) {
             this.collisionX = this.game.width + this.width + Math.random() * this.game.width * 0.5;
             this.collisionY = this.game.topMargin + (Math.random() * (this.game.height - this.game.topMargin));
+            this.frameX = Math.floor(Math.random() * 2); 
             this.frameY = Math.floor(Math.random() * 4);
         }
 
@@ -276,6 +271,31 @@ class Enemy {
             }
         })
      }
+
+}
+
+class Toadskin extends Enemy{
+    constructor(game) {
+        super(game);
+        this.image = document.getElementById("toads");
+        this.spriteHeight = 260; 
+        this.spriteWidth = 140; 
+        this.width = this.spriteWidth; 
+        this.height = this.spriteHeight;
+        this.collisionX = this.game.width + this.width + Math.random() * this.game.width * 0.5;
+    }
+}
+
+class Barkskin extends Enemy {
+    constructor(game) {
+        super(game);
+        this.image = document.getElementById("bark");
+        this.spriteHeight = 280; 
+        this.spriteWidth = 183; 
+        this.width = this.spriteWidth; 
+        this.height = this.spriteHeight;
+        this.collisionX = this.game.width + this.width + Math.random() * this.game.width * 0.5;
+    }
 
 }
 
@@ -470,12 +490,10 @@ class Game {
 
         window.addEventListener('keydown', (e) => {
 
-            if(e.key == 'd') {
-                this.debug = !this.debug;
-            }        
-            else if(e.key == 'r') {
-                this.restart();
-            }
+            if(e.key == 'd') this.debug = !this.debug;
+            else if(e.key == 'r') this.restart();
+            else if(e.key == 'c') console.log(this.gameObjects);
+            
         }); 
     }
     
@@ -571,7 +589,8 @@ class Game {
     }
 
     addEnemy() {
-        this.enemies.push(new Enemy(this))
+        if (Math.random() > 0.5) this.enemies.push(new Toadskin(this));
+        else this.enemies.push(new Barkskin(this));
     }
 
     removeGameObjects() {

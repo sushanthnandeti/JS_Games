@@ -21,6 +21,6 @@
     pointer-events: none;
 }
 
-#obstacles, #bull, #egg, #toad, #toads, #larva{
+#obstacles, #bull, #egg, #toad, #toads, #larva, #bark{
     display: none;
 }
