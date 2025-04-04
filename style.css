@@ -5,6 +5,11 @@
     font-family: 'Bangers', cursive;
 }
 
+h1 {
+    font-size: 80px;
+    text-align: center;
+}
+
 #canvas1 {
     background : url('background.png');
     position: absolute;
