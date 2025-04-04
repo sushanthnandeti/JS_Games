@@ -31,6 +31,7 @@ class Player {
         this.image = document.getElementById("bull");
         this.frameX = 0;
         this.frameY = 5;
+        this.maxFrame = 58;
     
     }
 
@@ -76,6 +77,15 @@ class Player {
         else if (angle < 1.96) this.frameY = 4;
         else if (angle < 2.74) this.frameY = 5;
 
+        // player sprite animation --> Makes the player come alive
+
+        if (this.frameX < this.maxFrame) {
+            this.frameX++;
+        }
+        else {
+            this.frameX = 0;
+        }
+        
         const distance = Math.hypot(this.dy, this.dx);
         this.speedModifier = 20;
 
