@@ -493,6 +493,7 @@ class Game {
             if(e.key == 'd') this.debug = !this.debug;
             else if(e.key == 'r') this.restart();
             else if(e.key == 'c') console.log(this.gameObjects);
+            else if(e.key == 'f') this.toggleFullScreen();
             
         }); 
     }
@@ -597,6 +598,15 @@ class Game {
         this.eggs = this.eggs.filter(object => !object.markedForDeletion);
         this.hatchlings = this.hatchlings.filter(object => !object.markedForDeletion);
         this.particles = this.particles.filter(object => !object.markedForDeletion);
+    }
+
+    toggleFullScreen() {
+        if(!document.fullscreenElement) {
+            document.documentElement.fullscreenElement();
+        }
+        else if (document.fullscreenElement) {
+            document.exitFullscreen;
+        }
     }
 
     restart() {
