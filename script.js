@@ -85,7 +85,7 @@ class Player {
         else {
             this.frameX = 0;
         }
-        
+
         const distance = Math.hypot(this.dy, this.dx);
         this.speedModifier = 20;
 
@@ -312,7 +312,7 @@ class Barkskin extends Enemy {
 class Larva { 
     constructor(game, x, y) {
         this.game = game; 
-        this.image = document.getElementById("larva");
+        this.image = document.getElementById("larva_sprite");
         this.collisionRadius = 40;
         this.collisionX = x;
         this.collisionY = y; 
@@ -325,7 +325,7 @@ class Larva {
         this.frameX = 0; 
         this.frameY = Math.floor(Math.random() * 2);
         this.speedY = 1 + Math.random();
-
+        this.maxFrame = 38;
     }
 
     draw(context) {
@@ -359,6 +359,15 @@ class Larva {
             for (let i = 0; i < 3 ; i++) {
                 this.game.particles.push(new FireFly(this.game, this.collisionX, this.collisionY, 'yellow'));
             }      
+        }
+
+        // Larva sprite animation --> Makes the larva come alive
+
+        if (this.frameX < this.maxFrame) {
+            this.frameX++;
+        }
+        else {
+            this.frameX = 0;
         }
         // collision with obstacles
         let collisionObjects = [this.game.player, ...this.game.obstacles, ...this.game.eggs];
